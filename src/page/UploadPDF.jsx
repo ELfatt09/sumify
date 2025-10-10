@@ -112,10 +112,9 @@ function PdfItem({ fileName, fileUrl }) {
   const generateSummary = async () => {
     try {
   const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
     contents: fileName,
     model: "gemini-2.0-flash",
-    instruction: "Summarize the PDF",
+    instruction: "Ringkas isi PDF ini.",
   });
       setSummary(response.text);
     } catch (error) {
