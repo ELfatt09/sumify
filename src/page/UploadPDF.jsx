@@ -98,14 +98,41 @@ export default function UploadPDF() {
         <h3 className="text-md font-semibold mb-2">Uploaded PDFs:</h3>
         <ul className="list-disc list-inside text-left max-h-48 overflow-y-auto">
           {uploads.map((upload) => (
-            <li key={upload.id}>
-              <a href={upload.file_url} target="_blank" className="underline">
-                {upload.file_name}
-              </a>
-            </li>
+            <PdfItem key={upload.id} fileName={upload.file_name} fileUrl={upload.file_url} />
           ))}
         </ul>
       </div>
     </div>
   );
 }
+
+function PdfItem({ fileName, fileUrl }) {
+  const [summary, setSummary] = useState(null);
+
+  const generateSummary = async () => {
+    try {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: fileName,
+    model: "gemini-2.0-flash",
+    instruction: "Summarize the PDF",
+  });
+      setSummary(response.text);
+    } catch (error) {
+      console.error(error);
+      setSummary("Failed to generate summary");
+    }
+   }
+
+  return (
+    <li>
+      <a href={fileUrl} target="_blank" className="underline">
+        {fileName}
+      </a>
+      <button onClick={generateSummary} className="ml-4 px-2 py-1 bg-blue-600 text-white rounded">
+        Ringkas
+      </button>
+      {summary && <p className="mt-2 text-gray-700">Ringkasan: {summary}</p>}
+    </li>
+  );
+ }
