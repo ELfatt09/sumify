@@ -4,6 +4,8 @@ import React, {
   useEffect,
   useState,
 } from "react";
+
+import { signUp, signIn, GoogleSignIn, signOut } from "../services/supabaseAuthService";
 import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext();
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const handleSignUp = async (email, password) => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password});
+    const error= await signUp(email, password);
     setLoading(false);
     if (error) alert(error.message);
     else alert("Check your email for verification");
@@ -25,74 +27,21 @@ export const AuthProvider = ({ children }) => {
 
   const handleSignIn = async (email, password) => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const error = await signIn(email, password);
     setLoading(false);
     if (error) alert(error.message);
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
+    const error = await signOut();
     if (error) alert(error.message);
   };
 
   const handleGoogleSignIn = async () => {
-  try {
-    // const redirectUri = AuthSession.makeRedirectUri({
-    //   scheme: "todone",
-    // });
-    // console.log("Redirect URI:", redirectUri);
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: "http://localhost:5173",
-        // skipBrowserRedirect: true,
-      },
-    });
-
-    if (error) {
-      console.error("Supabase signInWithOAuth error:", error);
-      alert(error.message);
-      return;
-    }
-
-//     if (data?.url) {
-//       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUri);
-//       console.log("openAuthSession result:", result);
-
-//       if (result.type === "success" && result.url) {
-//   const url = result.url;
-//   console.log("Result URL:", url);
-
-//   // Pisahkan fragment (setelah '#')
-//   const [, fragment] = url.split('#');  // fragment = "access_token=...&refresh_token=...&..."
-//   if (fragment) {
-//     // Parse fragment ke object
-//     const params = fragment.split('&').reduce((acc, part) => {
-//       const [key, val] = part.split('=');
-//       if (key && val !== undefined) {
-//         acc[key] = decodeURIComponent(val);
-//       }
-//       return acc;
-//     });
-
-//     console.log("Parsed fragment params:", params);
-//     const access_token = params['access_token'];
-//     const refresh_token = params['refresh_token'];
-
-//     if (access_token && refresh_token) {
-//       const { data: sessionData, error: sessionError } =
-//         await supabase.auth.setSession({ access_token, refresh_token });
-//       // lanjut sesuai logika
-//     }
-//   }
-// }
-
-//     }
-  } catch (err) {
-    console.error("GoogleSignIn error:", err);
-    alert(err.message);
-  }
+    setLoading(true);
+    const error = await GoogleSignIn();
+    setLoading(false);
+    if (error) alert(error.message);
 };
 
 
