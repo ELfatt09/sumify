@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../context/authContext'
 import { useParams } from 'react-router-dom'
+import { Navigate } from 'react-router-dom';
 
 function Auth() {
-    const params = useParams();
+  const params = useParams();
+  const { session } = useAuth();
     const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -16,7 +18,11 @@ function Auth() {
     
       const handleSignInPress = () => {
         handleSignIn(email, password);
-      };
+  };
+  
+  if (session !== null) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="flex-1 bg-white px-6 pt-20">
