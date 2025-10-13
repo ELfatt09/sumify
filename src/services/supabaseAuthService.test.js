@@ -36,7 +36,7 @@ describe("supabaseAuthService Sign Up test", () => {
 
         await supabase.auth.signUp.mockResolvedValue({ error: null });
         const error = await signUp(email, password);
-        expect(error).toBe(null);
+        expect(error).toStrictEqual(null);
     });
 
 
@@ -44,14 +44,35 @@ describe("supabaseAuthService Sign Up test", () => {
         const email = "a4bYh@example.com";
         const password = "password123";
 
-        const errorMessage = "Sign-up failed";
+        const errorMock = new Error( "Sign-up failed");
 
-        await supabase.auth.signUp.mockResolvedValue({ error: errorMessage });
+        await supabase.auth.signUp.mockResolvedValue({ error: errorMock });
 
         const error = await signUp(email, password);
 
-        expect(error).toBe(errorMessage);
-    });
+        expect(error).toStrictEqual(errorMock);
+        });
+    it("signUp should return error when email format is not right", async () => {
+        const email = "invalid-email";
+        const password = "password123";
+
+        const errorMock = new Error("Invalid email format");
+
+        await supabase.auth.signUp.mockResolvedValue({ error: null });
+        const error = await signUp(email, password);
+        expect(error).toStrictEqual(errorMock);
+    })
+
+    it("signUp should return error when password is less than 6 characters, and contain at least one number", async () => {
+        const email = "a4bYh@example.com";
+        const password = "pass";
+
+        const errorMock = new Error("Password must be at least 6 characters, and contain at least one number");
+
+        await supabase.auth.signUp.mockResolvedValue({ error: null });
+        const error = await signUp(email, password);
+        expect(error).toStrictEqual(errorMock);
+    })
 
 });
 
@@ -70,18 +91,44 @@ describe("supabaseAuthService Sign In test", () => {
         expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({ email, password });
     });
 
+    it("signIn should return error when email format is not right", async () => {
+        const email = "invalid-email";
+        const password = "password123";
+
+        const errorMock = new Error("Invalid email format");
+
+        console.log(errorMock);
+
+        await supabase.auth.signInWithPassword.mockResolvedValue({ error: null });
+        const error = await signIn(email, password);
+        expect(error).toStrictEqual(errorMock);
+    })
+
+    
+
         it("signIn should return error when supabase.auth.signInWithPassword fails", async () => {
         const email = "a4bYh@example.com";
         const password = "password123";
 
-        const errorMessage = "Sign-in failed";
+        const errorMock = new Error("Sign-in failed");
 
-        await supabase.auth.signInWithPassword.mockResolvedValue({ error: errorMessage });
+        await supabase.auth.signInWithPassword.mockResolvedValue({ error: errorMock });
 
         const error = await signIn(email, password);
 
-        expect(error).toBe(errorMessage);
-    });
+        expect(error).toBe(errorMock);
+        });
+    
+    it("signIn should return error when password is less than 6 characters or there is no number", async () => {
+        const email = "a4bYh@example.com";
+        const password = "pass";
+
+        const errorMock = new Error("Password must be at least 6 characters, and contain at least one number");
+
+        await supabase.auth.signInWithPassword.mockResolvedValue({ error: null });
+        const error = await signIn(email, password);
+        expect(error).toStrictEqual(errorMock);
+    })
 });
 describe("supabaseAuthService Sign In With Google test", () => {
     beforeEach(() => {
@@ -101,13 +148,13 @@ describe("supabaseAuthService Sign In With Google test", () => {
     });
 
     it("GoogleSignIn should return error when supabase.auth.signInWithOAuth fails", async () => {
-        const errorMessage = "Sign-in with Google failed";
+        const errorMock = new Error("Sign-in with Google failed");
 
-        await supabase.auth.signInWithOAuth.mockResolvedValue({ error: errorMessage });
+        await supabase.auth.signInWithOAuth.mockResolvedValue({ error: errorMock });
 
         const error = await GoogleSignIn();
 
-        expect(error).toBe(errorMessage);
+        expect(error).toStrictEqual(errorMock);
     });
 
  });
@@ -123,13 +170,13 @@ describe("supabaseAuthService Sign Out test", () => {
     });
 
     it("signInOut should return error when supabase.auth.signOut fails", async () => {
-        const errorMessage = "Sign-out failed";
+        const errorMock = new Error("Sign-out failed");
 
-        await supabase.auth.signOut.mockResolvedValue({ error: errorMessage });
+        await supabase.auth.signOut.mockResolvedValue({ error: errorMock });
 
         const error = await signOut();
 
-        expect(error).toBe(errorMessage);
+        expect(error).toBe(errorMock);
     });
 
     it("signInOut should return null when supabase.auth.signOut succeeds", async () => {
