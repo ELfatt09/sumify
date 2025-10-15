@@ -1,3 +1,4 @@
+import { Session } from '@google/genai';
 import { supabase } from '../lib/supabase';
 import { isEmailValid } from '../utils/emailUtils';
 import { isPasswordValid } from '../utils/passwordUtils';
@@ -54,3 +55,32 @@ export const GoogleSignIn = async () => {
     return err;
   }
 };
+
+export const getSessionData = async () => {
+  try{
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error("Supabase getSession error:", error);
+      return data.session;
+    }
+    return data.session;
+  } catch (err) {
+    console.error("getSessionData error:", err);
+    return null;
+  }
+}
+
+export const getUserData = async () => {
+  try{
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Supabase getUser error:", error);
+      return data.user;
+    }
+    return data.user;
+  } catch (err) {
+    console.error("getUserData error:", err);
+    return null;
+  }
+ }
+

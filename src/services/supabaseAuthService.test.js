@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { signUp, signIn, signOut, GoogleSignIn } from "./supabaseAuthService";
+import { signUp, signIn, signOut, GoogleSignIn, getSessionData, getUserData } from "./supabaseAuthService";
 
 vi.mock("../lib/supabase", () => ({
     supabase: {
@@ -8,6 +8,8 @@ vi.mock("../lib/supabase", () => ({
             signUp: vi.fn(),
             signOut: vi.fn(),
             signInWithOAuth: vi.fn(),
+            getSession: vi.fn(),
+            getUser: vi.fn(),
         },
     },
 }));
@@ -185,4 +187,60 @@ describe("supabaseAuthService Sign Out test", () => {
         expect(error).toBe(null);
     });
 
- });
+});
+ 
+describe("supabaseAuthService get session test", async () => {
+    it("getSessionData should call supabase.auth.getSession", async () => {
+        await supabase.auth.getSession.mockResolvedValue({ data: null });
+
+        await getSessionData();
+
+        expect(supabase.auth.getSession).toHaveBeenCalled();
+    })
+    it("getSessionData should return session data when supabase.auth.getSession return data", async () => {
+        const sessionMock = { session: { token: "abcdefghijk", expires_in: "3600", provider: "ABC" } }
+
+        await supabase.auth.getSession.mockResolvedValue({ data: sessionMock })
+
+        const sessionData = await getSessionData();
+
+        expect(sessionData).toStrictEqual(sessionMock.session)
+    })
+        it("getSessionData should return null when supabase.auth.getSession return null", async () => {
+        const sessionMock = { session: null }
+
+        await supabase.auth.getSession.mockResolvedValue({ data: sessionMock })
+
+        const sessionData = await getSessionData();
+
+        expect(sessionData).toStrictEqual(sessionMock.session)
+    })
+})
+ 
+describe("supabaseAuthService get user test", async () => {
+    it("getUsernData should call supabase.auth.getSession", async () => {
+        await supabase.auth.getUser.mockResolvedValue({ data: null });
+
+        await getUserData();
+
+        expect(supabase.auth.getUser).toHaveBeenCalled();
+    })
+    it("getSessionData should return session data when supabase.auth.getSession return data", async () => {
+        const userMock = { user:{ id: "abcdefghijk-lmnopqrstu-vwxyz", email: "test@test.test", name: "John Doe"} }
+
+        await supabase.auth.getUser.mockResolvedValue({ data: userMock })
+
+        const userData = await getUserData();
+
+        expect(userData).toStrictEqual(userMock.user)
+    })
+        it("getSessionData should return null when supabase.auth.getSession return null", async () => {
+        const userMock = { user: null }
+
+        await supabase.auth.getUser.mockResolvedValue({ data: userMock })
+
+        const userData = await getSessionData();
+
+        expect(userData).toStrictEqual(userMock.user)
+    })
+ })

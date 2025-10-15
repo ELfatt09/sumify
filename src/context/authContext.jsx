@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 
-import { signUp, signIn, GoogleSignIn, signOut } from "../services/supabaseAuthService";
+import { signUp, signIn, GoogleSignIn, signOut, getSessionData, getUserData } from "../services/supabaseAuthService";
 import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext();
@@ -50,11 +50,14 @@ export const AuthProvider = ({ children }) => {
 
     // Get initial session (if exists)
     setLoading(true);
-    supabase.auth.getSession().then(({ data: { session }}) => {
+    getSessionData().then(( session ) => {
       console.log("Initial session:", session);
-      console.log("Initial user data:", session?.user);
-      setUserData(session?.user || null);
       setSession(session);
+    });
+
+    getUserData().then(( user ) => {
+      console.log("Initial user data:", user);
+      setUserData(user || null);
     });
 
     // Listen to auth changes
