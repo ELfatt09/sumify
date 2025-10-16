@@ -3,7 +3,8 @@ import { useAuth } from "../context/authContext";
 import { getAllUploads, uploadPDFToSupabase } from "../services/supabaseService";
 import { arrayBufferToBase64 } from "../utils/pdfUtils";
 import { cleanGeminiHTML } from "../utils/htmlUtils";
-import { generateSummaryFromPDF } from "../services/geminiService";
+import { generateSummaryFromPDF } from "../services/summarizeService";
+import { data } from "../data/ai-buttons";
 
 export default function UploadPDF() {
   const { handleSignOut } = useAuth();
@@ -83,7 +84,7 @@ export default function UploadPDF() {
         <h3 className="text-md font-semibold mb-2">Uploaded PDFs:</h3>
         <ul className="list-disc list-inside text-left">
           {uploads.map((upload) => (
-            <PdfItem key={upload.id} fileName={upload.file_name} fileUrl={upload.file_url} />
+            <PdfItem key={upload.id} uploadId={upload.id} fileName={upload.file_name} fileUrl={upload.file_url} />
           ))}
         </ul>
       </div>
@@ -91,15 +92,31 @@ export default function UploadPDF() {
   );
 }
 
-function PdfItem({ fileName, fileUrl }) {
+function PdfItem({ fileName, fileUrl, uploadId }) {
+  const [openedFeatureId, setOpenedFeatureId] = useState(null);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSummarize = async () => {
+
+  useEffect(() => {
+    setSummary();
+  }, [openedFeatureId]);
+
+  const getExistingSummary = async (featureId) => {
+    try {
+      const rawHTML = await generateSummaryFromPDF(null, null, featureId, uploadId);
+      setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat membuat ringkasan.");
+    } catch (err) {
+      console.error(err);
+      setSummary("Gagal membuat ringkasan.");
+    }
+  }
+
+  const handleSummarize = async (prompt, featureId, uploadId) => {
     setLoading(true);
     try {
-      const base64PDF = await arrayBufferToBase64(fileUrl);
-      const rawHTML = await generateSummaryFromPDF(base64PDF);
+      const base64PDF = await arrayBufferToBase64(fileUrl, featureId);
+      const rawHTML = await generateSummaryFromPDF(base64PDF, prompt, featureId, uploadId);
       setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat membuat ringkasan.");
     } catch (err) {
       console.error(err);
@@ -114,14 +131,16 @@ function PdfItem({ fileName, fileUrl }) {
       <a href={fileUrl} target="_blank" className="underline text-blue-600">
         {fileName}
       </a>
-      <button
-        onClick={handleSummarize}
-        disabled={loading}
-        className="ml-4 px-2 py-1 bg-blue-600 text-white rounded"
-      >
-        {loading ? "Merangkum..." : "Ringkas"}
-      </button>
-
+      {data.map((button) => (
+        <button
+          key={button.id}
+          onClick={() => handleSummarize(button.prompt, button.id, uploadId)}
+          disabled={loading}
+          className="ml-4 px-2 py-1 bg-blue-600 text-white rounded"
+        >
+          {loading ? "Merangkum..." : button.title}
+        </button>
+      ))}
       {summary && (
         <div className="mt-2">
           <strong>Ringkasan:</strong>
