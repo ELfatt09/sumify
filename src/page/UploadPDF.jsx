@@ -164,7 +164,7 @@ function PdfItem({ fileName, fileUrl, uploadId }) {
 
       {summary && (
         <div className="mt-3">
-          <strong className="text-gray-800">Ringkasan:</strong>
+          <strong className="text-gray-800">{ aiButtons[openedFeatureId - 1]?.title }</strong>
           <div
             className="prose prose-sm max-w-none mt-2 text-gray-700"
             dangerouslySetInnerHTML={{ __html: summary }}
