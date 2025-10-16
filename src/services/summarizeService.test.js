@@ -10,9 +10,10 @@ vi.mock("../lib/gemini", () => ({
 
 vi.mock("./storedAiResponseService", () => ({
   createOrUpdateResponseInDatabase: vi.fn(),
+  getResponseFromDatabase: vi.fn(),
 }))
 
-import { createOrUpdateResponseInDatabase } from "./storedAiResponseService";
+import { createOrUpdateResponseInDatabase, getResponseFromDatabase } from "./storedAiResponseService";
 
 
 
@@ -63,6 +64,8 @@ describe("summarizeService", () => {
       );
     });
   });
+
+
 
   
 });

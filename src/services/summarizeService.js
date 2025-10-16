@@ -4,10 +4,8 @@ import { createOrUpdateResponseInDatabase } from "./storedAiResponseService";
 
 
 export async function generateSummaryFromPDF(base64PDF, prompt, featureId, uploadId) {
+  console.log("generateSummaryFromPDF called with", { base64PDF, prompt, featureId, uploadId });
 
-  if (!base64PDF) {
-    
-  }
   const finalPrompt = `
     ${prompt}
     Gunakan hanya tag: <p>, <ul>, <li>, <strong>, <br>.
@@ -26,11 +24,13 @@ export async function generateSummaryFromPDF(base64PDF, prompt, featureId, uploa
       contents,
     });
 
+    console.log("generateSummaryFromPDF result", result);
+
     await createOrUpdateResponseInDatabase(result?.candidates?.[0]?.content?.parts?.[0]?.text, featureId, uploadId);
 
     return result?.candidates?.[0]?.content?.parts?.[0]?.text || "";
   } catch (error) {
-    console.error(error);
+    console.error("generateSummaryFromPDF error", error);
     return `Gagal membuat ringkasan. ${error.message}`;
   }
 }

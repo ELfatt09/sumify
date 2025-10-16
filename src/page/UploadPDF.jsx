@@ -4,7 +4,8 @@ import { getAllUploads, uploadPDFToSupabase } from "../services/supabaseService"
 import { arrayBufferToBase64 } from "../utils/pdfUtils";
 import { cleanGeminiHTML } from "../utils/htmlUtils";
 import { generateSummaryFromPDF } from "../services/summarizeService";
-import { data } from "../data/ai-buttons";
+import { data as aiButtons } from "../data/ai-buttons";
+import { getResponseFromDatabase } from "../services/storedAiResponseService";
 
 export default function UploadPDF() {
   const { handleSignOut } = useAuth();
@@ -14,18 +15,13 @@ export default function UploadPDF() {
   const [fileUrl, setFileUrl] = useState(null);
 
   useEffect(() => {
-    getAllUploads()
-      .then(setUploads)
-      .catch(console.error);
+    getAllUploads().then(setUploads).catch(console.error);
   }, []);
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
-    if (uploadedFile && uploadedFile.type === "application/pdf") {
-      setFile(uploadedFile);
-    } else {
-      alert("Please upload a valid PDF file!");
-    }
+    if (uploadedFile?.type === "application/pdf") setFile(uploadedFile);
+    else alert("Please upload a valid PDF file!");
   };
 
   const handleUpload = async (e) => {
@@ -46,25 +42,30 @@ export default function UploadPDF() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-400 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+    <div className="relative flex flex-col items-center w-full max-w-2xl mx-auto p-8 border-2 border-dashed border-gray-300 rounded-2xl bg-white shadow-sm hover:shadow-md transition">
       <button
         onClick={handleSignOut}
-        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-sm font-medium"
       >
         Sign Out
       </button>
 
-      <h2 className="text-lg font-semibold mb-3">Upload your PDF</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Upload your PDF</h2>
 
-      <form onSubmit={handleUpload} className="flex flex-col items-center gap-4">
-        <input type="file" accept="application/pdf" onChange={handleFileChange} />
-        {file && <p className="text-sm text-gray-600">{file.name}</p>}
+      <form onSubmit={handleUpload} className="flex flex-col items-center gap-4 w-full">
+        <input
+          type="file"
+          accept="application/pdf"
+          onChange={handleFileChange}
+          className="cursor-pointer border border-gray-300 p-2 rounded-lg w-full text-gray-600 hover:border-gray-400 transition"
+        />
+        {file && <p className="text-sm text-gray-500">{file.name}</p>}
 
         <button
           type="submit"
           disabled={uploading}
-          className={`px-4 py-2 rounded-lg text-white ${
-            uploading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
+          className={`px-6 py-2 rounded-lg text-white font-medium transition ${
+            uploading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
           }`}
         >
           {uploading ? "Uploading..." : "Upload to Supabase"}
@@ -72,22 +73,27 @@ export default function UploadPDF() {
       </form>
 
       {fileUrl && (
-        <p className="text-green-600 mt-3">
+        <p className="text-green-600 mt-4 text-sm">
           ✅ Uploaded!{" "}
-          <a href={fileUrl} target="_blank" className="underline">
+          <a href={fileUrl} target="_blank" className="underline hover:text-green-700">
             View PDF
           </a>
         </p>
       )}
 
-      <div className="mt-6 w-full">
-        <h3 className="text-md font-semibold mb-2">Uploaded PDFs:</h3>
-        <ul className="list-disc list-inside text-left">
+      <section className="mt-8 w-full">
+        <h3 className="text-lg font-semibold mb-3 text-gray-700">Uploaded PDFs</h3>
+        <ul className="space-y-4">
           {uploads.map((upload) => (
-            <PdfItem key={upload.id} uploadId={upload.id} fileName={upload.file_name} fileUrl={upload.file_url} />
+            <PdfItem
+              key={upload.id}
+              uploadId={upload.id}
+              fileName={upload.file_name}
+              fileUrl={upload.file_url}
+            />
           ))}
         </ul>
-      </div>
+      </section>
     </div>
   );
 }
@@ -97,22 +103,21 @@ function PdfItem({ fileName, fileUrl, uploadId }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
-    setSummary();
+    if (openedFeatureId) getExistingSummary(openedFeatureId);
   }, [openedFeatureId]);
 
   const getExistingSummary = async (featureId) => {
     try {
-      const rawHTML = await generateSummaryFromPDF(null, null, featureId, uploadId);
-      setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat membuat ringkasan.");
+      const rawHTML = await getResponseFromDatabase(uploadId, featureId);
+      setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat memuat ringkasan sebelumnya.");
     } catch (err) {
       console.error(err);
-      setSummary("Gagal membuat ringkasan.");
+      setSummary("Gagal memuat ringkasan.");
     }
-  }
+  };
 
-  const handleSummarize = async (prompt, featureId, uploadId) => {
+  const handleSummarize = async (prompt, featureId) => {
     setLoading(true);
     try {
       const base64PDF = await arrayBufferToBase64(fileUrl, featureId);
@@ -127,32 +132,52 @@ function PdfItem({ fileName, fileUrl, uploadId }) {
   };
 
   return (
-    <li className="mb-4">
-      <a href={fileUrl} target="_blank" className="underline text-blue-600">
-        {fileName}
-      </a>
-      {data.map((button) => (
-        <button
-          key={button.id}
-          onClick={() => handleSummarize(button.prompt, button.id, uploadId)}
-          disabled={loading}
-          className="ml-4 px-2 py-1 bg-blue-600 text-white rounded"
+    <li className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm hover:shadow transition">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <a
+          href={fileUrl}
+          target="_blank"
+          className="font-medium text-blue-600 hover:underline truncate max-w-sm"
         >
-          {loading ? "Merangkum..." : button.title}
-        </button>
-      ))}
+          {fileName}
+        </a>
+
+        <div className="flex flex-wrap gap-2">
+          {aiButtons.map((button) => (
+            <button
+              key={button.id}
+              onClick={() =>
+                setOpenedFeatureId(openedFeatureId === button.id ? null : button.id)
+              }
+              disabled={loading}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                openedFeatureId === button.id
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              {loading && openedFeatureId === button.id ? "Memproses..." : button.title}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {summary && (
-        <div className="mt-2">
-          <strong>Ringkasan:</strong>
+        <div className="mt-3">
+          <strong className="text-gray-800">Ringkasan:</strong>
           <div
-            className="
-              [&>p]:mt-2 [&>p]:text-justify
-              [&>ul]:list-disc [&>ul]:list-inside [&>ul]:mt-2
-              [&>li]:ml-4 [&>li]:mt-1
-              [&>strong]:font-semibold
-            "
+            className="prose prose-sm max-w-none mt-2 text-gray-700"
             dangerouslySetInnerHTML={{ __html: summary }}
           />
+
+          <button
+            onClick={() =>
+              handleSummarize(aiButtons[openedFeatureId - 1]?.prompt, openedFeatureId)
+            }
+            className="mt-3 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition"
+          >
+            Generate
+          </button>
         </div>
       )}
     </li>
