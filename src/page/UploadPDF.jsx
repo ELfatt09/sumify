@@ -113,7 +113,7 @@ function PdfItem({ fileName, fileUrl, uploadId }) {
       setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat memuat ringkasan sebelumnya.");
     } catch (err) {
       console.error(err);
-      setSummary("Gagal memuat ringkasan.");
+      setSummary("Ringkasan belum tersedia.");
     }
   };
 
@@ -164,11 +164,20 @@ function PdfItem({ fileName, fileUrl, uploadId }) {
 
       {summary && (
         <div className="mt-3">
-          <strong className="text-gray-800">{ aiButtons[openedFeatureId - 1]?.title }</strong>
+          <strong className="text-gray-800">{aiButtons[openedFeatureId - 1]?.title}</strong>
+          {loading ? "Memproses..." : ""}
           <div
-            className="prose prose-sm max-w-none mt-2 text-gray-700"
-            dangerouslySetInnerHTML={{ __html: summary }}
-          />
+  className="
+    prose prose-sm max-w-none mt-3 text-gray-700 leading-relaxed
+    [&>p]:mt-2 [&>p]:mb-3 [&>p]:text-justify
+    [&>ul]:list-disc [&>ul]:list-inside [&>ul]:pl-5 [&>ul]:mt-2 [&>ul]:space-y-1
+    [&>li]:ml-4 [&>li]:text-gray-700
+    [&>strong]:font-semibold [&>strong]:text-gray-900
+    [&>br]:block [&>br]:my-2
+  "
+  dangerouslySetInnerHTML={{ __html: summary }}
+/>
+
 
           <button
             onClick={() =>

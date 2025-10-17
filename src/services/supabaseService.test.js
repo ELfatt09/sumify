@@ -3,10 +3,12 @@ import { getAllUploads, uploadPDFToSupabase } from "./supabaseService";
 
 // 🧠 Mock supabase client
 vi.mock("../lib/supabase", () => {
-  const selectMock = vi.fn();
+  const orderMock = vi.fn();
+  const singleMock = vi.fn();
+  const eqMock = vi.fn(() => ({ single: singleMock, eq: eqMock}));
+  const selectMock = vi.fn(() => ({ eq: eqMock, order: orderMock }));
   const insertMock = vi.fn();
-  const uploadMock = vi.fn();
-  const getPublicUrlMock = vi.fn();
+  const updateEqMock = vi.fn();
 
   const fromMock = vi.fn((tableName) => {
     if (tableName === "uploads") {
@@ -41,7 +43,7 @@ describe("getAllUploads", () => {
     const mockData = [{ id: 1, file_name: "test.pdf" }];
 
     // Directly reference selectMock through supabase.from("uploads").select
-    supabase.from("uploads").select.mockResolvedValue({
+    supabase.from("uploads").select("*").order.mockResolvedValue({
       data: mockData,
       error: null,
     });
@@ -53,7 +55,7 @@ describe("getAllUploads", () => {
   it("should throw error when query fails", async () => {
     const mockError = new Error("Database error");
 
-    supabase.from("uploads").select.mockResolvedValue({
+    supabase.from("uploads").select("*").order.mockResolvedValue({
       data: null,
       error: mockError,
     });

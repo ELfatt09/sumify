@@ -1,9 +1,14 @@
 import { supabase } from "../lib/supabase";
 
 export async function getAllUploads() {
-  const { data, error } = await supabase.from("uploads").select("*");
+  try { 
+    const { data, error } = await supabase.from("uploads").select("*").order("created_at", { ascending: false });
   if (error) throw error;
   return data;
+  } catch (error) { 
+    throw error
+  }
+  
 }
 
 export async function uploadPDFToSupabase(file) {
