@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 
-import { signUp, signIn, GoogleSignIn, signOut, getSessionData, getUserData } from "../services/supabaseAuthService";
+import { signUp, signIn, GoogleSignIn, signOut, getSessionData, getUserData, sendEmailConfirmation } from "../services/supabaseAuthService";
 import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext();
@@ -19,10 +19,22 @@ export const AuthProvider = ({ children }) => {
 
   const handleSignUp = async (email, password) => {
     setLoading(true);
-    const error= await signUp(email, password);
+    await signUp(email, password);
     setLoading(false);
-    if (error) alert(error.message);
-    else alert("Check your email for verification");
+  };
+
+  const handleResendEmailConfirmation = async (email) => {
+    try {
+      setLoading(true);
+      const { error } = await sendEmailConfirmation(email);
+      if (error) {
+        throw error;
+      };
+    } catch (error) {
+      alert(error.message);
+    }finally {
+      setLoading(false);
+    }
   };
 
   const handleSignIn = async (email, password) => {
@@ -88,6 +100,7 @@ export const AuthProvider = ({ children }) => {
         handleSignIn,
         handleGoogleSignIn,
         handleSignOut,
+        handleResendEmailConfirmation,
         loading,
         userData,
       }}

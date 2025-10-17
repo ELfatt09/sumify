@@ -41,7 +41,7 @@ export const GoogleSignIn = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:5173",
+        redirectTo: import.meta.env.VITE_APP_URL,
       },
     });
 
@@ -57,7 +57,13 @@ export const GoogleSignIn = async () => {
 };
 
 export const sendEmailConfirmation = async (email) => {
-    const { error } = await supabase.auth.resend({ email });
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: email,
+    options: {
+      redirectTo: import.meta.env.VITE_APP_URL,
+    },
+  });
     return error || null;
 }
 

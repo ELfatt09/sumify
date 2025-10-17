@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/authContext'
-import { useParams } from 'react-router-dom'
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import ilustration from '../assets/Ilustration.svg'
 import logo from '../assets/new-logo.svg'
@@ -14,10 +13,15 @@ function Auth() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [page, setPage] = useState(params.page || "login");
-    const { handleSignIn, handleSignUp, loading } = useAuth();
+  const { handleSignIn, handleSignUp, loading } = useAuth();
+
+  const navigate = useNavigate()
+  
     
     const handleSignUpPress = () => {
-        handleSignUp(email, password);
+      handleSignUp(email, password);
+      navigate("/auth/email-confirmation/" + encodeURIComponent(email));
+
       };
     
       const handleSignInPress = () => {
