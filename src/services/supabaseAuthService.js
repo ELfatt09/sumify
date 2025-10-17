@@ -56,6 +56,11 @@ export const GoogleSignIn = async () => {
   }
 };
 
+export const sendEmailConfirmation = async (email) => {
+    const { error } = await supabase.auth.resend({ email });
+    return error || null;
+}
+
 export const getSessionData = async () => {
   try{
     const { data, error } = await supabase.auth.getSession();

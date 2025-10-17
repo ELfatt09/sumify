@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { signUp, signIn, signOut, GoogleSignIn, getSessionData, getUserData } from "./supabaseAuthService";
+import { signUp, signIn, signOut, GoogleSignIn, getSessionData, getUserData, sendEmailConfirmation } from "./supabaseAuthService";
 
 vi.mock("../lib/supabase", () => ({
     supabase: {
@@ -10,6 +10,7 @@ vi.mock("../lib/supabase", () => ({
             signInWithOAuth: vi.fn(),
             getSession: vi.fn(),
             getUser: vi.fn(),
+            resend: vi.fn(),
         },
     },
 }));
@@ -242,5 +243,34 @@ describe("supabaseAuthService get user test", async () => {
         const userData = await getSessionData();
 
         expect(userData).toStrictEqual(userMock.user)
+        })
+})
+
+describe("supabaseAuthService email confirmation test", async () => {
+    beforeEach(() => {
+        vi.resetAllMocks();
     })
- })
+    it("confirmEmail should call supabase.auth.resend", async () => {
+        const emailMock = "a4bYh@example.com";
+        await supabase.auth.resend.mockResolvedValue({ error: null });
+
+        await sendEmailConfirmation(emailMock);
+
+        expect(supabase.auth.resend).toHaveBeenCalled();
+    })
+    it("confirmEmail should return null when supabase.auth.resend succeeds", async () => {
+        const emailMock = "a4bYh@example.com";
+        await supabase.auth.resend.mockResolvedValue({ error: null });
+        const error = await sendEmailConfirmation(emailMock);
+        expect(error).toBe(null);
+    });
+    it("confirmEmail should return error when supabase.auth.resend fails", async () => {
+        const emailMock = "a4bYh@example.com";
+        const errorMock = new Error("Email confirmation failed");
+
+        await supabase.auth.resend.mockResolvedValue({ error: errorMock });
+
+        const error = await sendEmailConfirmation();
+        expect(error).toBe(errorMock);
+    })
+})
