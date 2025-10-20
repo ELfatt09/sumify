@@ -23,20 +23,23 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
+  // Yes, the finally block will always get executed, regardless of whether an exception is thrown or not.
+
   const handleResendEmailConfirmation = async (email) => {
     try {
       setLoading(true);
-      const { error } = await sendEmailConfirmation(email);
+      const error = await sendEmailConfirmation(email);
+      console.error(error);
       if (error) {
-        throw error;
-      };
+        return error;
+      }
     } catch (error) {
-      alert(error.message);
-    }finally {
+      return error;
+    } finally {
       setLoading(false);
     }
-  };
-
+    return null;
+  }
   const handleSignIn = async (email, password) => {
     setLoading(true);
       const error = await signIn(email, password);

@@ -58,13 +58,17 @@ export const GoogleSignIn = async () => {
 
 export const sendEmailConfirmation = async (email) => {
   const { error } = await supabase.auth.resend({
-    type: "signup",
+    type: "signu",
     email: email,
     options: {
       redirectTo: import.meta.env.VITE_APP_URL,
     },
   });
-    return error || null;
+  if (error) {
+    console.error("Supabase resend error:", error);
+    return error;
+  }
+    return error;
 }
 
 export const getSessionData = async () => {

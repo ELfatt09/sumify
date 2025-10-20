@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/instrument-sans": "^5.2.8",
     "@google/genai": "^1.23.0",
     "@supabase/supabase-js": "^2.74.0",
     "@tailwindcss/vite": "^4.1.14",
