@@ -7,7 +7,7 @@ import { generateSummaryFromPDF } from "../services/summarizeService";
 import { data as aiButtons } from "../data/ai-buttons";
 import { getResponseFromDatabase } from "../services/storedAiResponseService";
 import { supabase } from "../lib/supabase";
-import Navbar from "../partials/navbar";
+import Navbar from "../partials/Navbar";
 import { useNotification } from "../context/notificationContext";
 
 export default function UploadPDF() {

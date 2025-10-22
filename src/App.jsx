@@ -5,7 +5,7 @@ import { AuthProvider } from './context/authContext'
 import { supabase } from './lib/supabase'
 import { useEffect, useState } from 'react'
 import Authenticated from './middlewares/Authenticated'
-import EmailConfirmation from './page/EmailConfirmation'
+import EmailConfirmation from './page/emailConfirmation'
 import { NotificationProvider } from './context/notificationContext'
 
 function App() {
