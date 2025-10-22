@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/authContext'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
-import ilustration from '../assets/Ilustration.svg'
 import logo from '../assets/new-logo.svg'
 import googleIcon from '../assets/google.svg'
 
@@ -12,8 +11,7 @@ function Auth() {
   const { session } = useAuth();
     const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [page, setPage] = useState(params.page || "login");
+  const page = params.page;
   const { handleSignIn, handleSignUp, loading } = useAuth();
 
   const navigate = useNavigate()
@@ -40,9 +38,9 @@ function Auth() {
   }
 
   return (
-    <div className='py-10 flex flex-col  justify-center items-center bg-[#F1F1F1] min-w-full min-h-screen font-sans'>
+    <div className='pb-10 md:pt-10 flex flex-col  justify-center items-center bg-white md:bg-[#F1F1F1] min-w-full min-h-screen font-sans'>
 
-      <div className='flex flex-col space-y-9 bg-white w-full max-w-sm px-8 py-12 rounded-3xl shadow-2xl'>
+      <div className='flex flex-col space-y-9 bg-white w-full max-w-sm px-8 py-12 rounded-3xl md:shadow-2xl'>
 
         {/* Title */}
         <div className='flex flex-col space-y-6'>

@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/authContext';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 function EmailConfirmation() {
     const params = useParams();
   const { email } = params;
   const [isResendSuccess, setIsResendSuccess] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
-  const { handleResendEmailConfirmation } = useAuth();
+  const { handleResendEmailConfirmation, session } = useAuth();
   
   const handleResendEmailConfirmationPress = async () => {
     const error = await handleResendEmailConfirmation(email);
@@ -21,6 +21,10 @@ function EmailConfirmation() {
     }
 
   };
+    
+    if (session !== null) {
+      return <Navigate to="/" replace />;
+    }
 
 
   return (

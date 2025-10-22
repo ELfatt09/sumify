@@ -13,6 +13,7 @@ export async function getAllUploads() {
 
 export async function uploadPDFToSupabase(file) {
   const fileName = `${Date.now()}-${file.name}`;
+  const fileTitle = file.name.split(".")[0];
   const { data, error } = await supabase.storage
     .from("Pdfs")
     .upload(fileName, file);
@@ -23,6 +24,7 @@ export async function uploadPDFToSupabase(file) {
   await supabase.from("uploads").insert({
     file_name: fileName,
     file_url: publicUrlData.publicUrl,
+    title: fileTitle,
   });
 
   return publicUrlData.publicUrl;

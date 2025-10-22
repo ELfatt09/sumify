@@ -58,7 +58,7 @@ export const GoogleSignIn = async () => {
 
 export const sendEmailConfirmation = async (email) => {
   const { error } = await supabase.auth.resend({
-    type: "signu",
+    type: "signup",
     email: email,
     options: {
       redirectTo: import.meta.env.VITE_APP_URL,
