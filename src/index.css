@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* --- self-hosted font setup --- */
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("./assets/fonts/InstrumentSans-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* --- connect it to Tailwind's font-sans utility --- */
+@theme {
+  --font-sans: "Instrument Sans", system-ui, sans-serif;
+}
+
+/* optional body style to test quickly */
+body {
+  @apply font-sans;
+}

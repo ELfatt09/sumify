@@ -4,95 +4,72 @@ import React, {
   useEffect,
   useState,
 } from "react";
+
+import { signUp, signIn, GoogleSignIn, signOut, getSessionData, getUserData, sendEmailConfirmation } from "../services/supabaseAuthService";
 import { supabase } from "../lib/supabase";
+import { useNotification } from "./notificationContext";
 
 const AuthContext = createContext();
 
 
 
 export const AuthProvider = ({ children }) => {
+  const {setNotification} = useNotification();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
 
   const handleSignUp = async (email, password) => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password});
+    await signUp(email, password);
     setLoading(false);
-    if (error) alert(error.message);
-    else alert("Check your email for verification");
+    setNotification("success", "Email konfirmasi berhasil dikirim ke " + email);
+
   };
 
+  // Yes, the finally block will always get executed, regardless of whether an exception is thrown or not.
+
+  const handleResendEmailConfirmation = async (email) => {
+    try {
+      setLoading(true);
+      const error = await sendEmailConfirmation(email);
+      if (error) {
+        setNotification("error", "Error mengirim email konfirmasi");
+        return error;
+      }
+      setNotification("success", "Email konfirmasi ulang berhasil dikirim ke " + email);
+    } catch (error) {
+      setNotification("error", "Error mengirim email konfirmasi");
+      return error;
+    } finally {
+      setLoading(false);
+    }
+    return null;
+  }
   const handleSignIn = async (email, password) => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const error = await signIn(email, password);
     setLoading(false);
-    if (error) alert(error.message);
+    if (error) {
+      setNotification("error", "Email atau password salah"); 
+      
+    }else{
+      setNotification("success", "berhasil masuk");
+    }
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) alert(error.message);
+    const error = await signOut();
+    if (error) setNotification("error", error.message);
+    else setNotification("success", "berhasil keluar");
   };
 
   const handleGoogleSignIn = async () => {
-  try {
-    // const redirectUri = AuthSession.makeRedirectUri({
-    //   scheme: "todone",
-    // });
-    // console.log("Redirect URI:", redirectUri);
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: "http://localhost:5173",
-        // skipBrowserRedirect: true,
-      },
-    });
-
-    if (error) {
-      console.error("Supabase signInWithOAuth error:", error);
-      alert(error.message);
-      return;
-    }
-
-//     if (data?.url) {
-//       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUri);
-//       console.log("openAuthSession result:", result);
-
-//       if (result.type === "success" && result.url) {
-//   const url = result.url;
-//   console.log("Result URL:", url);
-
-//   // Pisahkan fragment (setelah '#')
-//   const [, fragment] = url.split('#');  // fragment = "access_token=...&refresh_token=...&..."
-//   if (fragment) {
-//     // Parse fragment ke object
-//     const params = fragment.split('&').reduce((acc, part) => {
-//       const [key, val] = part.split('=');
-//       if (key && val !== undefined) {
-//         acc[key] = decodeURIComponent(val);
-//       }
-//       return acc;
-//     });
-
-//     console.log("Parsed fragment params:", params);
-//     const access_token = params['access_token'];
-//     const refresh_token = params['refresh_token'];
-
-//     if (access_token && refresh_token) {
-//       const { data: sessionData, error: sessionError } =
-//         await supabase.auth.setSession({ access_token, refresh_token });
-//       // lanjut sesuai logika
-//     }
-//   }
-// }
-
-//     }
-  } catch (err) {
-    console.error("GoogleSignIn error:", err);
-    alert(err.message);
-  }
+    setLoading(true);
+    const error = await GoogleSignIn();
+    setLoading(false);
+    if (error) setNotification("error", "Gagal masuk dengan Google");
+    else setNotification("success", "berhasil masuk dengan Google");
 };
 
 
@@ -101,11 +78,14 @@ export const AuthProvider = ({ children }) => {
 
     // Get initial session (if exists)
     setLoading(true);
-    supabase.auth.getSession().then(({ data: { session }}) => {
+    getSessionData().then(( session ) => {
       console.log("Initial session:", session);
-      console.log("Initial user data:", session?.user);
-      setUserData(session?.user || null);
       setSession(session);
+    });
+
+    getUserData().then(( user ) => {
+      console.log("Initial user data:", user);
+      setUserData(user || null);
     });
 
     // Listen to auth changes
@@ -136,6 +116,7 @@ export const AuthProvider = ({ children }) => {
         handleSignIn,
         handleGoogleSignIn,
         handleSignOut,
+        handleResendEmailConfirmation,
         loading,
         userData,
       }}
@@ -152,4 +133,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
 

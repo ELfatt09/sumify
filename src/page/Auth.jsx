@@ -1,89 +1,144 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../context/authContext'
-import { useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
+
+import logo from '../assets/new-logo.svg'
+import googleIcon from '../assets/google.svg'
+import Notification from '../partials/Notification'
+
 
 function Auth() {
-    const params = useParams();
+  const params = useParams();
+  const { session } = useAuth();
     const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [page, setPage] = useState(params.page || "login");
-    const { handleSignIn, handleSignUp, handleSignOut, loading } = useAuth();
+  const page = params.page;
+  const { handleSignIn, handleSignUp, loading } = useAuth();
+
+  const navigate = useNavigate()
+  
     
     const handleSignUpPress = () => {
-        handleSignUp(email, password);
+      handleSignUp(email, password);
+
+      navigate("/auth/email-confirmation/" + encodeURIComponent(email));
+
       };
     
       const handleSignInPress = () => {
         handleSignIn(email, password);
-      };
+  };
+
+  useEffect(() => {
+    if (page !== "login" && page !== "register") {
+      return <Navigate to="*" replace />;
+    }
+   })
+  
+  if (session !== null) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
-    <div className="flex-1 bg-white px-6 pt-20">
-      {/* Title */}
-      <h1 className="text-4xl font-bold mb-16">
-        {page === "login" ? "Masuk ke akun Anda" : "Buat akun baru"}
-        {"\n"}anda
-      </h1>
+    <>
+      <Notification />
+    <div className='pb-10 md:pt-10 flex flex-col  justify-center items-center bg-white md:bg-[#F1F1F1] min-w-full min-h-screen font-sans'>
 
-      {/* Username Input */}
-      {page === "signup" && (
-        <input
-          className="border-b text-xl border-gray-300 mb-10 py-2"
-          placeholder="Nama pengguna"
-          type="text"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-        />
-      )}
+      <div className='flex flex-col space-y-9 bg-white w-full max-w-sm px-8 py-12 rounded-3xl md:shadow-2xl'>
 
-      {/* Email Input */}
-      <input
-        className="border-b text-xl border-gray-300 mb-10 py-2"
-        placeholder="Email"
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
+        {/* Title */}
+        <div className='flex flex-col space-y-6'>
+          <h1 className='text-4xl font-semibold leading-[1.2] tracking-[-3%] text-black '>
+            {page === "login" ? "Selamat Datang Kembali 👋" : "Ayo Mulai Dengan Sumify 😎"}
+          </h1>
+          <p className='text-sm text-neutral-500'>{page === "login" ? "Masuk dan lanjutkan ngeringkas bareng Sumify ✨" : "Buat akun dan mulai ngeringkas dokumen dengan cepat⚡"}</p> 
+        </div>
 
-      {/* Password Input */}
-      <input
-        className="border-b text-xl border-gray-300 mb-16 py-2"
-        placeholder="Kata sandi"
-        type="password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
 
-      {/* Sign Up Button */}
-      <button onClick={page === "login" ? handleSignInPress : handleSignUpPress} className="mb-5 bg-black py-4 rounded-xl items-center">
-        <p className="text-white text-base font-semibold">{loading ? "Sedang..." : page === "login" ? "Masuk" : "Daftar"}</p>
-      </button>
+        <div className='flex flex-col space-y-3'>
+          <div className='flex flex-col space-y-6'>
+            <div className='flex flex-col space-y-4'>
+              <input
+                className='px-4 py-3 rounded-lg border border-neutral-300 text-base placeholder:text-neutral-400'
+            placeholder="Email"
+            id='email'
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
 
-      {/* Footer */}
-      <div className="flex-row justify-center mt-10 text-lg">
-        {page === "login" ? (
-          <>
-            <p className="text-gray-700">Belum punya akun? </p>
-            <button onClick={() => setPage("signup")}>
-              <p className="font-bold text-black">Daftar</p>
-            </button>
-          </>
-        ) : (
-          <>
-            <p className="text-gray-500">Sudah punya akun? </p>
-            <button onClick={() => setPage("login")}>
-              <p className="font-bold text-black">Masuk</p>
-            </button>
-          </>
-        )}
-      </div>
-      <div className="mt-16">
-        <p className="text-center text-gray-500 mb-2">Atau lanjutkan dengan:</p>
-        <GoogleSignIn />
+
+        {/* Password Input */}
+
+
+              <input
+                className='px-4 py-3 rounded-lg border border-neutral-300 text-base placeholder:text-neutral-400'
+            placeholder="Kata Sandi"
+            id='password'
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            />
+
+
+
+        {/* {page === 'login' && (
+         <div>
+          <div>
+            <a className='text-black text-sm font-medium cursor-pointer hover:underline' href="">Lupa kata sandi anda?</a>
           </div>
-          <button onClick={handleSignOut} className="mt-10 bg-red-600 py-2 px-4 rounded-xl items-center"></button>
-    </div>
+          
+        </div>
+        )} */}
+            </div>
+
+          
+
+        {/* Sign Up Button */}
+        <button className='transform transition duration-300 ease-in-out text-center cursor-pointer border border-black  text-white hover:text-black bg-black hover:bg-white py-3 text-base font-semibold hover:font-normal rounded-lg' onClick={page === "login" ? handleSignInPress : handleSignUpPress}>
+          <p>{loading ? "memproses" : page === "login" ? "Masuk" : "Daftar"}</p>
+            </button>
+        </div>
+
+          <p className="text-center text-neutral-600">atau</p>
+          <GoogleSignIn />
+
+      </div>
+        
+
+        {/* Footer */}
+        <div className="flex flex-row justify-center">
+          {page === "login" ? (
+            <div className="flex justify-center gap-2">
+              <p>Belum punya akun? </p>
+              <button onClick={() => navigate("/auth/register")} className='cursor-pointer hover:underline'>
+                <p className='font-semibold'>Daftar</p>
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-center gap-2">
+              <p>Sudah punya akun? </p>
+              <button onClick={() => navigate("/auth/login")} className='cursor-pointer hover:underline'>
+                <p className='font-semibold'>Masuk</p>
+              </button>
+            </div>
+          )}
+        </div>
+
+        
+      </div>
+      <div className="flex justify-center items-center gap-4 mt-10">
+          <div className="uppercase">
+            <h1>
+              Created By
+            </h1>
+          </div>
+          <div>
+            <img src={logo} alt="Logo Teh Developer" />
+          </div>
+        </div>
+      </div>
+      </>
   )
 }
 
@@ -91,9 +146,12 @@ function GoogleSignIn() {
   const { handleGoogleSignIn } = useAuth();
 
     return(
-    <div onClick={handleGoogleSignIn}>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22Logo%29.svg/1200px-Google_%22Logo.svg.png" alt="Google Logo" style={{ width: 48, height: 48, alignSelf: 'center', marginTop: 20 }} />
-        </div>
+    <div onClick={handleGoogleSignIn} className='cursor-pointer transform transition duration-300 ease-in-out flex justify-center items-center gap-4 w-full bg-white hover:bg-black py-3 rounded-md border border-black text-black hover:text-white  text-base'>
+      <img src={googleIcon} alt="" />
+      <p className=''>
+        Masuk dengan Google
+      </p>
+    </div>
     )
 }
 
