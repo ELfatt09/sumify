@@ -6,6 +6,7 @@ import { supabase } from './lib/supabase'
 import { useEffect, useState } from 'react'
 import Authenticated from './middlewares/Authenticated'
 import EmailConfirmation from './page/EmailConfirmation'
+import { NotificationProvider } from './context/notificationContext'
 
 function App() {
 const [user, setUser] = useState(null);
@@ -29,7 +30,9 @@ const [user, setUser] = useState(null);
   return () => subscription.subscription.unsubscribe();
 }, []);
   return (
+    <NotificationProvider>
     <AuthProvider>
+
 
 
     <BrowserRouter>
@@ -38,8 +41,9 @@ const [user, setUser] = useState(null);
           <Route path="/auth/:page" element={<Auth />} />
           <Route path="/auth/email-confirmation/:email" element={<EmailConfirmation/>} />
       </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
       </AuthProvider>
+      </NotificationProvider>
   )
 }
 

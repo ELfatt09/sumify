@@ -7,12 +7,14 @@ import React, {
 
 import { signUp, signIn, GoogleSignIn, signOut, getSessionData, getUserData, sendEmailConfirmation } from "../services/supabaseAuthService";
 import { supabase } from "../lib/supabase";
+import { useNotification } from "./notificationContext";
 
 const AuthContext = createContext();
 
 
 
 export const AuthProvider = ({ children }) => {
+  const {setNotification} = useNotification();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
@@ -21,6 +23,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     await signUp(email, password);
     setLoading(false);
+    setNotification("success", "Email konfirmasi berhasil dikirim ke " + email);
+
   };
 
   // Yes, the finally block will always get executed, regardless of whether an exception is thrown or not.
@@ -29,11 +33,13 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const error = await sendEmailConfirmation(email);
-      console.error(error);
       if (error) {
+        setNotification("error", "Error mengirim email konfirmasi");
         return error;
       }
+      setNotification("success", "Email konfirmasi ulang berhasil dikirim ke " + email);
     } catch (error) {
+      setNotification("error", "Error mengirim email konfirmasi");
       return error;
     } finally {
       setLoading(false);
@@ -44,19 +50,26 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
       const error = await signIn(email, password);
     setLoading(false);
-    if (error) alert(error.message);
+    if (error) {
+      setNotification("error", "Email atau password salah"); 
+      
+    }else{
+      setNotification("success", "berhasil masuk");
+    }
   };
 
   const handleSignOut = async () => {
     const error = await signOut();
-    if (error) alert(error.message);
+    if (error) setNotification("error", error.message);
+    else setNotification("success", "berhasil keluar");
   };
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     const error = await GoogleSignIn();
     setLoading(false);
-    if (error) alert(error.message);
+    if (error) setNotification("error", "Gagal masuk dengan Google");
+    else setNotification("success", "berhasil masuk dengan Google");
 };
 
 
@@ -120,4 +133,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
 

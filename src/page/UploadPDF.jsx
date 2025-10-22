@@ -8,9 +8,11 @@ import { data as aiButtons } from "../data/ai-buttons";
 import { getResponseFromDatabase } from "../services/storedAiResponseService";
 import { supabase } from "../lib/supabase";
 import Navbar from "../partials/navbar";
+import { useNotification } from "../context/notificationContext";
 
 export default function UploadPDF() {
-  const { handleSignOut, userData } = useAuth();
+  const { userData } = useAuth();
+  const { setNotification } = useNotification();
   const [file, setFile] = useState(null);
   const [uploads, setUploads] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -57,21 +59,21 @@ export default function UploadPDF() {
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
     if (uploadedFile?.type === "application/pdf") setFile(uploadedFile);
-    else alert("Please upload a valid PDF file!");
+    else setNotification("error","File yang diupload harus berformat PDF.");
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) return alert("Please select a PDF first!");
+    if (!file) return setNotification("error","Silahkan pilih file PDF.");
 
     try {
       setUploading(true);
       const url = await uploadPDFToSupabase(file);
       setFileUrl(url);
-      alert("🎉 Upload berhasil!");
+      setNotification("success","🎉 Upload berhasil!");
     } catch (err) {
       console.error(err);
-      alert("Upload gagal 😢");
+      setNotification("error","Upload gagal 😢");
     } finally {
       setUploading(false);
     }
@@ -81,12 +83,7 @@ export default function UploadPDF() {
     <>
       <Navbar />
       <div className="relative flex flex-col items-center w-full max-w-2xl mx-auto p-8 border border-gray-200 rounded-3xl bg-white shadow-sm hover:shadow-lg transition-all duration-300">
-      <button
-        onClick={handleSignOut}
-        className="absolute top-4 right-4 text-gray-500 hover:text-black text-sm font-medium transition"
-      >
-        🚪 Keluar
-      </button>
+
 
       <h2 className="text-3xl font-bold text-black mb-2">
         📄 Upload PDF-mu!
@@ -128,7 +125,7 @@ export default function UploadPDF() {
       {/* List View */}
       <section className="mt-10 w-full">
         <h3 className="text-xl font-semibold mb-3 text-black">
-          🗂 Daftar PDF
+          📁 Daftar PDF
         </h3>
         {uploads.length === 0 ? (
           <p className="text-gray-400 text-sm text-center">

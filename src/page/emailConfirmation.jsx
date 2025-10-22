@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/authContext';
 import { Navigate, useParams } from 'react-router-dom';
+import Notification from '../partials/Notification';
 
 function EmailConfirmation() {
     const params = useParams();
@@ -28,6 +29,8 @@ function EmailConfirmation() {
 
 
   return (
+    <>
+      <Notification />
     <div className='py-10 flex flex-col  justify-center items-center bg-[#F1F1F1] min-w-full min-h-screen font-sans'>
       <div className='flex flex-col space-y-9 bg-white w-full max-w-sm px-8 py-12 rounded-3xl shadow-2xl'>
         <div className='flex flex-col space-y-5'>
@@ -51,6 +54,7 @@ function EmailConfirmation() {
 
       </div>
       </div>
+    </>
   )
 }
 

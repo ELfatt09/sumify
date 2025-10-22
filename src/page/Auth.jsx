@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import logo from '../assets/new-logo.svg'
 import googleIcon from '../assets/google.svg'
+import Notification from '../partials/Notification'
 
 
 function Auth() {
@@ -19,6 +20,7 @@ function Auth() {
     
     const handleSignUpPress = () => {
       handleSignUp(email, password);
+
       navigate("/auth/email-confirmation/" + encodeURIComponent(email));
 
       };
@@ -38,6 +40,8 @@ function Auth() {
   }
 
   return (
+    <>
+      <Notification />
     <div className='pb-10 md:pt-10 flex flex-col  justify-center items-center bg-white md:bg-[#F1F1F1] min-w-full min-h-screen font-sans'>
 
       <div className='flex flex-col space-y-9 bg-white w-full max-w-sm px-8 py-12 rounded-3xl md:shadow-2xl'>
@@ -78,14 +82,14 @@ function Auth() {
 
 
 
-        {page === 'login' && (
+        {/* {page === 'login' && (
          <div>
           <div>
             <a className='text-black text-sm font-medium cursor-pointer hover:underline' href="">Lupa kata sandi anda?</a>
           </div>
           
         </div>
-        )}
+        )} */}
             </div>
 
           
@@ -133,7 +137,8 @@ function Auth() {
             <img src={logo} alt="Logo Teh Developer" />
           </div>
         </div>
-   </div>
+      </div>
+      </>
   )
 }
 
