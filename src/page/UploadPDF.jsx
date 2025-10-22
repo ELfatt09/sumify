@@ -8,6 +8,7 @@ import { data as aiButtons } from "../data/ai-buttons";
 import { getResponseFromDatabase } from "../services/storedAiResponseService";
 import { supabase } from "../lib/supabase";
 import Navbar from "../partials/navbar";
+
 import { useNotification } from "../context/notificationContext";
 
 export default function UploadPDF() {
