@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
 import { getAllUploads, uploadPDFToSupabase } from "../services/supabaseService";
-import { arrayBufferToBase64 } from "../utils/pdfUtils";
 import { cleanGeminiHTML } from "../utils/htmlUtils";
 import { generateSummaryFromPDF } from "../services/summarizeService";
 import { data as aiButtons } from "../data/ai-buttons";
@@ -177,18 +176,17 @@ function PdfModal({ pdf, onClose }) {
   const getExistingSummary = async (featureId) => {
     try {
       const rawHTML = await getResponseFromDatabase(pdf.id, featureId);
-      setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat memuat ringkasan sebelumnya.");
+      setSummary(cleanGeminiHTML(rawHTML) || "Tidak ada hasil sebelumnya.");
     } catch (err) {
       console.error(err);
-      setSummary("Ringkasan belum tersedia.");
+      setSummary("Belum ada hasil disimpan.");
     }
   };
 
   const handleSummarize = async (prompt, featureId) => {
     setLoading(true);
     try {
-      const base64PDF = await arrayBufferToBase64(pdf.file_url, featureId);
-      const rawHTML = await generateSummaryFromPDF(base64PDF, prompt, featureId, pdf.id);
+      const rawHTML = await generateSummaryFromPDF(prompt, featureId, pdf.id);
       setSummary(cleanGeminiHTML(rawHTML) || "Tidak dapat membuat ringkasan.");
     } catch (err) {
       console.error(err);
@@ -199,71 +197,82 @@ function PdfModal({ pdf, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-lg p-6 rounded-3xl shadow-xl relative animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+      <div className="relative bg-white/90 backdrop-blur-md w-full max-w-3xl p-6 rounded-3xl shadow-2xl transition-all duration-300 border border-gray-200">
+        
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-4 text-gray-500 hover:text-black text-xl"
+          className="absolute top-4 right-5 text-gray-500 hover:text-black text-xl"
         >
           ✖
         </button>
 
-        <h2 className="text-2xl font-bold text-black mb-2">
+        {/* Header */}
+        <h2 className="text-2xl font-bold text-black mb-1">
           📘 {pdf.title}
         </h2>
-        <p className="text-sm text-gray-400 mb-5">
-          Pilih fitur AI untuk diterapkan 👇
+        <p className="text-sm text-gray-500 mb-4">
+          Pilih fitur AI di bawah untuk melihat atau menghasilkan hasil baru.
         </p>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {aiButtons.map((button) => (
-            <button
-              key={button.id}
-              onClick={() =>
-                setOpenedFeatureId(openedFeatureId === button.id ? null : button.id)
-              }
-              disabled={loading}
-              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
-                openedFeatureId === button.id
-                  ? "bg-black text-white"
-                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-              }`}
-            >
-              {button.title}
-            </button>
-          ))}
+        {/* AI Feature Tabs */}
+        <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 mb-4">
+          {aiButtons.map((button) => {
+            const active = openedFeatureId === button.id;
+            return (
+              <button
+                key={button.id}
+                onClick={() =>
+                  setOpenedFeatureId(active ? null : button.id)
+                }
+                disabled={loading}
+                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-300
+                  ${active
+                    ? "bg-black  text-white font-semibold"
+                    : "hover:text-white hover:bg-black"
+                  }`}
+              >
+                {button.title}
+              </button>
+            );
+          })}
         </div>
 
-        {summary && (
-          <div className="border-t pt-3 mt-2">
-            <strong className="block mb-2 text-gray-800">
-              💬 {aiButtons[openedFeatureId - 1]?.title}
-            </strong>
-            {!loading && (
-              <div
-              className="prose prose-sm max-w-none text-gray-700 max-h-[200px] overflow-y-auto"
+        {/* AI Output Section */}
+        <div className="min-h-[200px] max-h-[400px] overflow-y-auto bg-gray-50 rounded-2xl p-4 text-gray-800 prose prose-sm scrollbar-thin scrollbar-thumb-gray-300">
+          {loading && (
+            <p className="text-gray-400 italic">🤖 Sedang memproses permintaan AI...</p>
+          )}
+
+          {!loading && summary && (
+            <div
               dangerouslySetInnerHTML={{ __html: summary }}
             />
-            )}
-            
-            {loading && (
-              <p className="text-gray-400 text-sm mt-2">
-                Sedang membuat memproses...
-              </p>
-            )}
+          )}
 
+          {!loading && !summary && (
+            <p className="text-gray-400 text-sm">
+              Pilih salah satu fitur AI untuk melihat hasilnya.
+            </p>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        {openedFeatureId && (
+          <div className="flex justify-end mt-4">
             <button
               onClick={() =>
                 handleSummarize(aiButtons[openedFeatureId - 1]?.prompt, openedFeatureId)
               }
-              className="mt-3 px-4 py-2 bg-black hover:bg-gray-800 text-white text-sm rounded-xl transition-all duration-300 transform hover:scale-105"
+              className="px-5 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-all duration-300"
             >
               🔄 Generate Ulang
             </button>
           </div>
         )}
       </div>
-      </div>
-      
+    </div>
   );
 }
+

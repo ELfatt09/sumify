@@ -21,7 +21,6 @@ vi.mock("../services/storedAiResponseService", () => ({
 
 
 describe("generateSummaryFromPDF", () => {
-  const mockBase64 = "JVBERi0xLjQKJcfs...";
   const mockPrompt = "Buat ringkasan singkat tentang isi PDF ini.";
   const mockFeatureId = 1;
   const mockUploadId = "upload-123";
@@ -37,7 +36,6 @@ describe("generateSummaryFromPDF", () => {
     });
 
     const result = await generateSummaryFromPDF(
-      mockBase64,
       mockPrompt,
       mockFeatureId,
       mockUploadId
@@ -47,7 +45,6 @@ describe("generateSummaryFromPDF", () => {
       "smart-function/gemini-summariser",
       {
         body: {
-          base64PDF: mockBase64,
           prompt: mockPrompt,
           featureId: mockFeatureId,
           uploadId: mockUploadId,
@@ -65,7 +62,6 @@ describe("generateSummaryFromPDF", () => {
     });
 
     const result = await generateSummaryFromPDF(
-      mockBase64,
       mockPrompt,
       mockFeatureId,
       mockUploadId
@@ -80,7 +76,7 @@ describe("generateSummaryFromPDF", () => {
       error: null,
     });
 
-    await generateSummaryFromPDF(mockBase64, mockPrompt, mockFeatureId, mockUploadId);
+    await generateSummaryFromPDF(mockPrompt, mockFeatureId, mockUploadId);
 
     expect(storedAiResponseService.createOrUpdateResponseInDatabase).toHaveBeenCalledWith(
       "<p>Output AI</p>",
