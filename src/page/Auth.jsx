@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/authContext'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
-import logo from '../assets/new-logo.svg'
+import logo from '../assets/teh-logo.png'
 import googleIcon from '../assets/google.svg'
 import Notification from '../partials/Notification'
 

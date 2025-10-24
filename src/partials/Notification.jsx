@@ -9,7 +9,7 @@ function Notification() {
     return (
     <>
         { isThereNotification && (
-                <div className={`z-50 fixed ${notificationType === 'success' ? 'bg-green-200' : 'bg-red-200'} shadow-md rounded-lg border ${notificationType === 'success' ? 'border-green-500' : 'border-red-500'} p-5 mx-10 mt-5`}>{notificationMessage}</div>
+          <div className={`z-50 fixed shadow-md rounded-lg border-2 ${notificationType === 'success' ? 'border-green-300' : 'border-red-300'} p-3 mx-10 mt-5 right-5`}>{ notificationType === 'success' ? '✅ ' : '❌ ' }{notificationMessage}</div>
         )
             }
     </>
