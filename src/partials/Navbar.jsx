@@ -49,9 +49,9 @@ function Navbar() {
           >
             <button
               onClick={handleSignOut}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+              className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-100 transition"
             >
-              Logout
+              keluar
             </button>
           </div>
         </div>
