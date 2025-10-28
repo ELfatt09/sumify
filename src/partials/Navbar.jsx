@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Notification from './Notification'
 import { useAuth } from '../context/authContext'
+import Lineicons from '@lineiconshq/react-lineicons'
+import { ExitOutlined } from '@lineiconshq/free-icons'
 
 function Navbar() {
   const { userData, handleSignOut } = useAuth()
@@ -49,9 +51,9 @@ function Navbar() {
           >
             <button
               onClick={handleSignOut}
-              className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-100 transition"
+              className=" w-full flex flex-row  items-center text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-100 transition"
             >
-              keluar
+              <Lineicons icon={ExitOutlined} size={24} /> <span className='ml-1'>keluar</span>
             </button>
           </div>
         </div>
