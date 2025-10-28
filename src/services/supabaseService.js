@@ -29,3 +29,14 @@ export async function uploadPDFToSupabase(file) {
 
   return publicUrlData.publicUrl;
 }
+
+export async function deletePDFFromSupabase(uploadId) {
+  try {
+    const { data, error } = await supabase.functions.invoke("delete-upload", { body: { uploadId } });
+    if (error) throw error;
+    return null;
+  } catch (error) {
+    throw error.error;
+  }
+  
+}

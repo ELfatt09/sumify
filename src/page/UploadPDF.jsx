@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
-import { getAllUploads, uploadPDFToSupabase } from "../services/supabaseService";
+import { getAllUploads, uploadPDFToSupabase, deletePDFFromSupabase } from "../services/supabaseService";
 import { cleanGeminiHTML } from "../utils/htmlUtils";
 import { generateSummaryFromPDF } from "../services/summarizeService";
 import { data as aiButtons } from "../data/ai-buttons";
 import { getResponseFromDatabase } from "../services/storedAiResponseService";
 import { supabase } from "../lib/supabase";
-import Navbar from "../partials/Navbar";
 import { useNotification } from "../context/notificationContext";
+import { Lineicons } from "@lineiconshq/react-lineicons";
+import Navbar from "../partials/Navbar";
+import { Trash3Bulk, Trash3Solid } from "@lineiconshq/free-icons";
 
 export default function UploadPDF() {
   const { userData } = useAuth();
@@ -165,6 +167,7 @@ export default function UploadPDF() {
 
 // 🧠 Modal Detail PDF
 function PdfModal({ pdf, onClose }) {
+  const { setNotification } = useNotification();
   const [openedFeatureId, setOpenedFeatureId] = useState(null);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -180,6 +183,17 @@ function PdfModal({ pdf, onClose }) {
     } catch (err) {
       console.error(err);
       setSummary("Belum ada hasil disimpan.");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deletePDFFromSupabase(pdf.id);
+      onClose();
+      setNotification("success","PDF berhasil dihapus.");
+    } catch (err) {
+      setNotification("error", "Gagal menghapus PDF.");
+      console.error(err);
     }
   };
 
@@ -259,18 +273,24 @@ function PdfModal({ pdf, onClose }) {
         </div>
 
         {/* Action Buttons */}
+        <div className="flex justify-between mt-4">
+                      <button onClick={() => handleDelete()} className="px-3 py-2 text-sm rounded-xl text-neutral-500 hover:text-red-400 transition-all duration-300">
+              <Lineicons icon={Trash3Solid} />            
+            </button>
+
         {openedFeatureId && (
-          <div className="flex justify-end mt-4">
+
             <button
               onClick={() =>
                 handleSummarize(aiButtons[openedFeatureId - 1]?.prompt, openedFeatureId)
               }
               className="px-5 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-all duration-300"
             >
-              🔄 Generate Ulang
+              Generate
             </button>
-          </div>
-        )}
+
+          )}
+                    </div>
       </div>
     </div>
   );
